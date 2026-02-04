@@ -229,7 +229,7 @@ Terima kasih.
 # 🔐 TAMBAHAN: MULTI ADMIN (EMAIL SAJA DI KODE)
 # =====================================================
 ADMINS = [
-    "admin1@gmail.com",
+    "fidelaadn06@gmail.com",
     "admin2@bps.go.id",
 ]
 
