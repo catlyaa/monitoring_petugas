@@ -398,11 +398,6 @@ def parse_jawaban(value):
         return []
     return [normalize_text(x) for x in str(value).split(",")]
 
-def parse_jawaban(value):
-    if pd.isna(value) or value == "":
-        return []
-    return [x.strip().lower() for x in str(value).split(",")]
-
 def cek_detail_kurang(row, zona):
     hasil = {}
     for ruangan, items_wajib in PEKERJAAN[zona].items():
