@@ -293,8 +293,8 @@ PEKERJAAN = {
             "Kebersihan Wastafel",
             "Hand soap tidak dalam kondisi kosong",
             "Pengharum ruangan tidak dalam kondisi kosong",
-            "Keset di toilet tetap bersih, kering, dan tertata rapi."
-            "Penggantian keset dilakukan secara berkala dan sesuai kondisi."
+            "Keset di toilet tetap bersih, kering, dan tertata rapi.",
+            "Penggantian keset dilakukan secara berkala dan sesuai kondisi.",
             "Membersihkan sudut-sudut plafon ruangan dari sawangan"
         ],
         "Ruang Harmoni (Rapat Besar)": [
@@ -400,14 +400,20 @@ def parse_jawaban(value):
 
 def cek_detail_kurang(row, zona):
     hasil = {}
+
     for ruangan, items_wajib in PEKERJAAN[zona].items():
         jawaban = parse_jawaban(row.get(ruangan, ""))
+
         kurang = []
         for item in items_wajib:
-            if item.lower() not in jawaban:
+            item_norm = normalize_text(item)
+
+            if item_norm not in jawaban:
                 kurang.append(item)
+
         if kurang:
             hasil[ruangan] = kurang
+
     return hasil
 
 # =====================================================
@@ -557,7 +563,7 @@ elif menu == "Notifikasi":
     nomor = 1
 
     # =========================================
-    # 1️⃣ PETUGAS BELUM ISI GFORM
+    # 1. PETUGAS BELUM ISI GFORM
     # =========================================
     st.subheader("❌ Belum Mengisi")
 
@@ -593,7 +599,11 @@ elif menu == "Notifikasi":
 
         nomor += 1
 
+    # =========================================
+    # 2. PETUGAS CHECKLIST TIDAK LENGKAP
+    # =========================================
     st.subheader("⚠️ Checklist Tidak Lengkap")
+
     for _, row in data_today.iterrows():
         zona = PETUGAS_ZONA.get(row["Nama Petugas"])
         if not zona:
