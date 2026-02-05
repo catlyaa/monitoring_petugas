@@ -173,6 +173,12 @@ section.main input::placeholder {{
     color: #0B3C5D;
 }}
 
+/* Semua header & isi tabel rata tengah */
+[data-testid="stDataFrame"] th,
+[data-testid="stDataFrame"] td {{
+    text-align: center !important;
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -472,11 +478,11 @@ if not st.session_state.login:
 # MENU
 # =====================================================
 if "menu" not in st.session_state:
-    st.session_state.menu = "Beranda"
+    st.session_state.menu = "⌂ Beranda"
 
 st.sidebar.markdown("<div class='menu-wrapper'>", unsafe_allow_html=True)
 
-for m in ["Beranda", "Detail Zona", "Notifikasi", "Logout"]:
+for m in ["⌂ Beranda", "☑ Detail Zona", "◕ Notifikasi", "↩ Logout"]:
     if st.sidebar.button(m, key=f"menu_{m}", use_container_width=True):
         st.session_state.menu = m
 
@@ -487,7 +493,7 @@ menu = st.session_state.menu
 # =====================================================
 # BERANDA
 # =====================================================
-if menu == "Beranda":
+if menu == "⌂ Beranda":
     header_bps()
     st.title("Selamat Datang 👋")
     st.subheader("Sistem Monitoring Kebersihan BPS Kota Cilegon")
@@ -501,14 +507,32 @@ if menu == "Beranda":
     c2.metric("Sudah Isi Hari Ini", len(petugas_sudah_isi))
     c3.metric("Belum Isi Hari Ini", len(petugas_belum_isi))
 
-    df = data[["Nama Petugas", "Email Petugas", "Tanggal", "Status Ruangan"]]
+    # ================= FILTER TANGGAL =================
+    tanggal_pilih = st.date_input(
+        "Pilih Tanggal",
+        value=hari_ini
+    )
+
+    # pastikan selalu list (biar konsisten)
+    if not isinstance(tanggal_pilih, (list, tuple)):
+        tanggal_pilih = [tanggal_pilih, tanggal_pilih]
+
+    tgl_awal, tgl_akhir = tanggal_pilih
+
+    # filter data
+    df_filter = data[
+        (data["Tanggal"] >= tgl_awal) &
+        (data["Tanggal"] <= tgl_akhir)
+        ]
+
+    df = df_filter[["Nama Petugas", "Email Petugas", "Tanggal", "Status Ruangan"]]
     df.insert(0, "No", range(1, len(df) + 1))
     st.dataframe(df, use_container_width=True, hide_index=True)
 
 # =====================================================
 # DETAIL ZONA
 # =====================================================
-elif menu == "Detail Zona":
+elif menu == "☑ Detail Zona":
     header_bps()
     st.subheader("Detail Checklist per Zona")
 
@@ -523,9 +547,26 @@ elif menu == "Detail Zona":
         f"{zona_pilih}."
     )
 
+    # ================= FILTER TANGGAL =================
+    tanggal_pilih = st.date_input(
+        "Pilih Tanggal",
+        value=hari_ini,
+        key="filter_zona"
+    )
+
+    if not isinstance(tanggal_pilih, (list, tuple)):
+        tanggal_pilih = [tanggal_pilih, tanggal_pilih]
+
+    tgl_awal, tgl_akhir = tanggal_pilih
+
     rows = []
 
-    for _, row in data.iterrows():
+    data_zona = data[
+        (data["Tanggal"] >= tgl_awal) &
+        (data["Tanggal"] <= tgl_akhir)
+        ]
+
+    for _, row in data_zona.iterrows():
         # hanya tampilkan petugas sesuai zona
         if PETUGAS_ZONA.get(row["Nama Petugas"]) != zona_pilih:
             continue
@@ -555,7 +596,7 @@ elif menu == "Detail Zona":
 # =====================================================
 # NOTIFIKASI
 # =====================================================
-elif menu == "Notifikasi":
+elif menu == "◕ Notifikasi":
     header_bps()
     st.subheader("Notifikasi")
     st.caption("Email peringatan untuk petugas yang belum mengisi atau checklist belum lengkap")
@@ -565,7 +606,7 @@ elif menu == "Notifikasi":
     # =========================================
     # 1. PETUGAS BELUM ISI GFORM
     # =========================================
-    st.subheader("❌ Belum Mengisi")
+    st.subheader("❌ Belum Mengisi ❌")
 
     for p in petugas_belum_isi:
         # ambil email TERAKHIR petugas tsb (bukan hari ini)
@@ -577,7 +618,6 @@ elif menu == "Notifikasi":
         email = df_petugas["Email Petugas"].iloc[-1]
 
         with st.container():
-            st.markdown("---")
             col1, col2 = st.columns([4, 1])
 
             with col1:
@@ -599,10 +639,16 @@ elif menu == "Notifikasi":
 
         nomor += 1
 
+    # ================= SPACER =================
+    # JARAK ANTAR BAGIAN
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
+
     # =========================================
     # 2. PETUGAS CHECKLIST TIDAK LENGKAP
     # =========================================
-    st.subheader("⚠️ Checklist Tidak Lengkap")
+    st.subheader("⚠️ Checklist Tidak Lengkap ⚠️")
 
     for _, row in data_today.iterrows():
         zona = PETUGAS_ZONA.get(row["Nama Petugas"])
@@ -610,22 +656,41 @@ elif menu == "Notifikasi":
             continue
 
         detail = cek_detail_kurang(row, zona)
-        if detail:
-            teks = ""
-            for r, i in detail.items():
-                teks += f"\n{r}:\n"
-                for x in i:
-                    teks += f"- {x}\n"
+        if not detail:
+            continue
 
-            st.warning(row["Nama Petugas"])
-            if st.button(f"Kirim Email {row['Nama Petugas']}"):
-                kirim_email(
-                    row["Email Petugas"],
-                    row["Nama Petugas"],
-                    "TIDAK_LENGKAP",
-                    row["Tanggal"],
-                    teks
-                )
+        # susun detail kekurangan
+        teks = ""
+        for r, i in detail.items():
+            teks += f"\n{r}:\n"
+            for x in i:
+                teks += f"- {x}\n"
+
+        with st.container():
+            col1, col2 = st.columns([4, 1])
+
+            with col1:
+                st.markdown(f"### {nomor}. {row['Nama Petugas']}")
+                st.warning("Status:TIDAK LENGKAP")
+                st.write(f"📅 Tanggal: {row['Tanggal']}")
+                st.write("📋 Detail kekurangan:")
+                st.code(teks)
+
+            with col2:
+                st.write("")
+                st.write("")
+                if st.button(
+                        "Kirim Email",
+                        key=f"tidak_lengkap_{row['Nama Petugas']}_{row['Tanggal']}"
+                ):
+                    sukses = kirim_email(
+                        row["Email Petugas"],
+                        row["Nama Petugas"],
+                        "TIDAK_LENGKAP",
+                        row["Tanggal"],
+                        teks
+                    )
+                    st.success("Email terkirim") if sukses else st.error("Gagal kirim email")
 
         nomor += 1
 
@@ -635,7 +700,7 @@ elif menu == "Notifikasi":
 # =====================================================
 # LOGOUT
 # =====================================================
-elif menu == "Logout":
+elif menu == "↩ Logout":
     st.session_state.login = False
-    st.session_state.menu = "Beranda"
+    st.session_state.menu = "⌂ Beranda"
     st.rerun()
