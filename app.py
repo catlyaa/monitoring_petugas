@@ -185,8 +185,8 @@ section.main input::placeholder {{
 # =====================================================
 # EMAIL CONFIG
 # =====================================================
-EMAIL_PENGIRIM = "jovitacw13@gmail.com"
-EMAIL_PASSWORD = "hvrqmxxxxscajxbn"
+EMAIL_PENGIRIM = "fidelaadn06@gmail.com"
+EMAIL_PASSWORD = "aghlvjcbaqvbsbxq"
 
 def kirim_email(tujuan, nama_petugas, status, tanggal, detail=""):
     if status == "BELUM":
