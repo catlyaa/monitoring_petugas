@@ -396,42 +396,45 @@ hari_ini = datetime.now().date()
 # =====================================================
 # PARSE JAWABAN GFORM
 # =====================================================
-def normalize_text(text):
-    return re.sub(r"[^\w\s]", "", text.lower()).strip()
-
 def parse_jawaban(value):
     if pd.isna(value) or value == "":
         return []
-    return [normalize_text(x) for x in str(value).split(",")]
+
+    # split koma
+    items = str(value).split(",")
+
+    # normalisasi bersih total
+    return [
+        re.sub(r"\s+", " ", x.lower().strip().replace(".", ""))
+        for x in items
+    ]
 
 def cek_detail_kurang(row, zona):
     hasil = {}
 
     for ruangan, items_wajib in PEKERJAAN[zona].items():
-        jawaban = parse_jawaban(row.get(ruangan, ""))
+        jawaban_raw = str(row.get(ruangan, "")).lower()
+
+        # normalisasi jawaban utuh
+        jawaban_norm = re.sub(r"[^\w\s]", " ", jawaban_raw)
+        jawaban_norm = re.sub(r"\s+", " ", jawaban_norm)
 
         kurang = []
         for item in items_wajib:
-            item_norm = normalize_text(item)
+            item_norm = re.sub(
+                r"[^\w\s]", " ",
+                item.lower()
+            )
+            item_norm = re.sub(r"\s+", " ", item_norm)
 
-            if item_norm not in jawaban:
+            # 🔥 PAKAI "IN", BUKAN LIST COMPARE
+            if item_norm not in jawaban_norm:
                 kurang.append(item)
 
         if kurang:
             hasil[ruangan] = kurang
 
     return hasil
-
-# =====================================================
-# STATUS PETUGAS
-# =====================================================
-def status_petugas(row):
-    zona = PETUGAS_ZONA.get(row["Nama Petugas"])
-    if not zona:
-        return "TIDAK TERDAFTAR"
-    return "LENGKAP" if not cek_detail_kurang(row, zona) else "TIDAK LENGKAP"
-
-data["Status Ruangan"] = data.apply(status_petugas, axis=1)
 
 # =====================================================
 # PETUGAS HARI INI
@@ -524,6 +527,17 @@ if menu == "⌂ Beranda":
         (data["Tanggal"] >= tgl_awal) &
         (data["Tanggal"] <= tgl_akhir)
         ]
+
+    # =====================================================
+    # STATUS PETUGAS
+    # =====================================================
+    def status_petugas(row):
+        zona = PETUGAS_ZONA.get(row["Nama Petugas"])
+        if not zona:
+            return "TIDAK TERDAFTAR"
+        return "LENGKAP" if not cek_detail_kurang(row, zona) else "TIDAK LENGKAP"
+
+    df_filter["Status Ruangan"] = df_filter.apply(status_petugas, axis=1)
 
     df = df_filter[["Nama Petugas", "Email Petugas", "Tanggal", "Status Ruangan"]]
     df.insert(0, "No", range(1, len(df) + 1))
