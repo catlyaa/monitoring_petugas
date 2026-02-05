@@ -212,7 +212,7 @@ checklist yang BELUM lengkap:
 
 {detail}
 
-Mohon segera dilengkapi.
+Mohon segera dilakukan pengisian ulang Google Form.
 
 Terima kasih.
 """
