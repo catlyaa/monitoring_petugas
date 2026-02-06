@@ -587,7 +587,7 @@ menu = st.session_state.menu
 if menu == "⌂ Beranda":
     header_bps()
     st.title("Selamat Datang 👋")
-    st.subheader("Sistem Monitoring Kebersihan BPS Kota Cilegon")
+    st.subheader("Sistem Layanan Kebersihan BPS Kota Cilegon")
     st.caption(
         "Sistem ini digunakan untuk memantau kelengkapan checklist kebersihan "
         "berdasarkan pengisian Google Form oleh petugas kebersihan."
