@@ -6,6 +6,7 @@ from email.mime.text import MIMEText
 import hashlib
 import base64
 import re
+import streamlit.components.v1 as components
 
 # =====================================================
 # PAGE CONFIG
@@ -18,31 +19,99 @@ st.set_page_config(
 # =====================================================
 # LOAD IMAGE BASE64 (LOGO & BACKGROUND)
 # =====================================================
-def get_base64(file_path):
-    with open(file_path, "rb") as f:
+def get_base64(path):
+    with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
 
-LOGO_BPS = get_base64("logo_bps.png")
-BG_CLEAN = get_base64("bg2.png")
+LOGO_BPS = get_base64("assets/bps.png")
+BG_CLEAN = get_base64("assets/bg1.png")
+LOGO_SE = get_base64("assets/se.png")
+LOGO_WBK = get_base64("assets/wbk.png")
+LOGO_BER = get_base64("assets/berakhlak.png")
+LOGO_SELASIH = get_base64("assets/selasih.png")
 
 def header_bps():
-    st.markdown(f"""
-    <div style="
-        display:flex;
-        align-items:center;
-        gap:15px;
-        margin-bottom:25px;
-    ">
-        <img src="data:image/png;base64,{LOGO_BPS}" width="70">
-        <div style="
-            font-size:22px;
-            font-weight:700;
-            color:#0B3C5D;
-        ">
-            Badan Pusat Statistik Kota Cilegon
+    components.html(f"""
+    <style>
+        .header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px 6px 0px;
+            width: 100%;
+            overflow: visible;
+        }}
+
+        .left {{
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-left: -20px;
+        }}
+
+        .right {{
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-right: 8px;
+        }}
+
+        /* BASE LOGO */
+        .logo {{
+            width: auto;
+            object-fit: contain;
+        }}
+
+        /* LOGO BPS - DIPERBESAR DAN LEBIH KE KIRI LAGI */
+        .logo-bps {{
+            height: 95px;
+            margin-left: 0px;
+        }}
+
+        /* LOGO SELASIH - TIDAK DIUBAH */
+        .logo-selasih {{
+            height: 74px;
+            transform: scale(1.5);
+        }}
+
+        /* LOGO SE - TIDAK DIUBAH */
+        .logo-se {{
+            height: 74px;
+            transform: scale(1.9);
+        }}
+
+        /* LOGO WBK - TIDAK DIUBAH */
+        .logo-wbk {{
+            height: 54px;
+        }}
+
+        /* LOGO BERAKHLAK - DIKECILKAN, DINAIKKAN, DAN LEBIH KE KIRI LAGI */
+        .logo-ber {{
+            height: 46px;
+            margin-top: -8px;
+            margin-left: -10px;
+        }}
+
+        .title {{
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.2;
+        }}
+    </style>
+
+    <div class="header">
+        <div class="left">
+            <img class="logo logo-bps" src="data:image/png;base64,{LOGO_BPS}">
+        </div>
+
+        <div class="right">
+            <img class="logo logo-selasih" src="data:image/png;base64,{LOGO_SELASIH}">
+            <img class="logo logo-se" src="data:image/png;base64,{LOGO_SE}">
+            <img class="logo logo-wbk" src="data:image/png;base64,{LOGO_WBK}">
+            <img class="logo logo-ber" src="data:image/png;base64,{LOGO_BER}">
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """, height=105)  # DIKECILKAN DARI 118 KE 105
 
 # =====================================================
 # GLOBAL STYLE
@@ -53,6 +122,21 @@ st.markdown(f"""
 /* ================= FONT ================= */
 html, body, [class*="css"] {{
     font-family: "Times New Roman", Times, serif;
+}}
+
+/* ================= HILANGKAN SPACE DI ATAS ================= */
+.main .block-container {{
+    padding-top: 1rem !important;
+    padding-bottom: 0rem;
+    margin-top: 0rem !important;
+}}
+
+header {{
+    background-color: transparent !important;
+}}
+
+[data-testid="stHeader"] {{
+    background-color: transparent !important;
 }}
 
 /* ================= BACKGROUND ================= */
@@ -66,7 +150,7 @@ html, body, [class*="css"] {{
 
 /* ================= SIDEBAR ================= */
 [data-testid="stSidebar"] {{
-    background-color: #0B3C5D;
+    background: linear-gradient(180deg, #CC6600 0%, #A85100 100%);
     padding-top: 20px;
 }}
 
@@ -80,7 +164,7 @@ html, body, [class*="css"] {{
 
 /* BUTTON MENU */
 [data-testid="stSidebar"] button {{
-    background-color: #0E4A73 !important;
+    background-color: #B35900 !important;
     color: white !important;
     font-weight: 600 !important;
     border-radius: 8px !important;
@@ -90,7 +174,7 @@ html, body, [class*="css"] {{
 
 /* HOVER */
 [data-testid="stSidebar"] button:hover {{
-    background-color: #1C6EA4 !important;
+    background-color: #D97706 !important;
     color: white !important;
 }}
 
@@ -155,22 +239,26 @@ section.main input::placeholder {{
 }}
 
 /* ================= HEADER ================= */
-.header {{
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 10px 0px 20px 0px;
+/* HEADER STREAMLIT */
+header[data-testid="stHeader"] {{
+    height: 55px;              /* header dipendekin */
+    padding-top: 0px;
+    padding-bottom: 0px;
 }}
 
-.header img {{
-    width: 55px;
-    opacity: 1;
+/* ISI HEADER */
+header[data-testid="stHeader"] > div {{
+    align-items: flex-start;   /* bikin konten header nempel ke atas */
 }}
 
-.header-title {{
-    font-size: 20px;
-    font-weight: 700;
-    color: #0B3C5D;
+/* SEMUA LOGO */
+header img {{
+    margin-top: -18px;         /* NAIKIN LOGO KE ATAS */
+}}
+
+/* BIAR KONTEN GA KETIBAN HEADER */
+.block-container {{
+    padding-top: 2.5rem;
 }}
 
 /* Semua header & isi tabel rata tengah */
@@ -185,8 +273,8 @@ section.main input::placeholder {{
 # =====================================================
 # EMAIL CONFIG
 # =====================================================
-EMAIL_PENGIRIM = "fidelaadn06@gmail.com"
-EMAIL_PASSWORD = "aghlvjcbaqvbsbxq"
+EMAIL_PENGIRIM = "jovitacw13@gmail.com"
+EMAIL_PASSWORD = "hvrqmxxxxscajxbn"
 
 def kirim_email(tujuan, nama_petugas, status, tanggal, detail=""):
     if status == "BELUM":
@@ -384,7 +472,7 @@ PEKERJAAN = {
 # =====================================================
 # LOAD DATA
 # =====================================================
-data = pd.read_csv("Form5.csv")
+data = pd.read_csv("form4.csv")
 data["Tanggal"] = pd.to_datetime(
     data["Tanggal Pelaksanaan  "],
     dayfirst=True,
