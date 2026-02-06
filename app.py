@@ -23,12 +23,12 @@ def get_base64(path):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
 
-LOGO_BPS = get_base64("assets/bps.png")
-BG_CLEAN = get_base64("assets/bg1.png")
-LOGO_SE = get_base64("assets/se.png")
-LOGO_WBK = get_base64("assets/wbk.png")
-LOGO_BER = get_base64("assets/berakhlak.png")
-LOGO_SELASIH = get_base64("assets/selasih.png")
+LOGO_BPS = get_base64("bps.png")
+BG_CLEAN = get_base64("bg1.png")
+LOGO_SE = get_base64("se.png")
+LOGO_WBK = get_base64("wbk.png")
+LOGO_BER = get_base64("berakhlak.png")
+LOGO_SELASIH = get_base64("selasih.png")
 
 def header_bps():
     components.html(f"""
