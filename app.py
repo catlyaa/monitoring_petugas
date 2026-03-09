@@ -323,7 +323,7 @@ Terima kasih.
 # 🔐 TAMBAHAN: MULTI ADMIN (EMAIL SAJA DI KODE)
 # =====================================================
 ADMINS = [
-    "fidelaadn06@gmail.com",
+    "catlya1305@gmail.com",
     "admin2@bps.go.id",
 ]
 
@@ -336,7 +336,7 @@ def hash_password(password):
 PETUGAS_ZONA = {
     "Petugas Jaga": "Zona 1",
     "Salmin": "Zona 2",
-    "Rudi": "Zona 3"
+    "Rudi Irawan": "Zona 3"
 }
 
 # =====================================================
