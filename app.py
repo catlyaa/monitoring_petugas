@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import pytz
 import smtplib
 from email.mime.text import MIMEText
 import hashlib
@@ -12,7 +13,7 @@ import streamlit.components.v1 as components
 # PAGE CONFIG
 # =====================================================
 st.set_page_config(
-    page_title="Monitoring Kebersihan BPS Kota Cilegon",
+    page_title="Sistem Layanan Kebersihan BPS Kota Cilegon",
     layout="wide"
 )
 
@@ -479,7 +480,8 @@ data["Tanggal"] = pd.to_datetime(
     errors="coerce"
 ).dt.date
 
-hari_ini = datetime.now().date()
+wib = pytz.timezone("Asia/Jakarta")
+hari_ini = datetime.now(wib).date()
 
 # =====================================================
 # PARSE JAWABAN GFORM
